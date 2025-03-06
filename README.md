@@ -1,26 +1,73 @@
 # ModelContextProtocol
 
-
+This gem enables the Model Context Protocol for Thor command-line applications.
 
 ## Installation
-
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
 
 Install the gem and add to the application's Gemfile by executing:
 
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle add modelcontextprotocol
 ```
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install modelcontextprotocol
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+**THIS DOES NOT WORK YET AND IS WHAT THIS PROJECT ASPIRES TO**
+
+Include the `ModelContextProtocol::Thor` in a Thor command-line application to enable model context protocol for the CLI:
+
+```ruby
+class MyCLI < Thor
+  # Enables MCP for the CLI
+  include ModelContextProtocol::Thor
+
+  desc "hello GREETING", "Say hello"
+  def hello(name)
+    puts "Hello #{name}"
+  end
+end
+```
+
+Then boot the model context server via:
+
+```ruby
+MyCLI.mcp.start
+```
+
+This boots a model context protocol server that connects to your tools that support MCP.
+
+### Terminalwire
+
+If you'd like to integrate your Rails SaaS to AI development tools, you maybe install Terminalwire Rails server and include it in the CLI.
+
+```ruby
+class MyCLI < Thor
+  # Enable streaming from the server to the Terminalwire thin client.
+  include Terminalwire::Thor
+
+  # Enables MCP for the CLI
+  include ModelContextProtocol::Thor
+
+  desc "hello GREETING", "Say hello"
+  def hello(name)
+    puts "Hello #{name}"
+  end
+end
+```
+
+You'll then need to [create a Terminalwire distribution](https://terminalwire.com/docs/rails/distribution) and provide your users with the one-liner curl installer:
+
+```sh
+$ curl https://my-app.terminalwire.sh | bash
+```
+
+Your users then boot the MCP server via `my-app mcp` to integrate with their MCP client.
 
 ## Development
 
