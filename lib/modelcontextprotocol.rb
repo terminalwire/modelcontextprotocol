@@ -21,11 +21,21 @@ module ModelContextProtocol
         obj.map { |item| camelize_hash_keys(item) }
       when Hash
         obj.each_with_object({}) do |(key, value), new_hash|
-          new_key = camelize(key.to_s)
+          new_key = modify_key(key.to_s)
           new_hash[new_key] = camelize_hash_keys(value)
         end
       else
         obj
+      end
+    end
+
+    def modify_key(key)
+      # In some cases, we want to emit keys that don't get snake cased, so for that
+      # we freeze strings and leave them alone.
+      if key.is_a?(String) and key.frozen?
+        key
+      else
+        camelize key
       end
     end
 
@@ -54,10 +64,8 @@ module ModelContextProtocol
 
     def to_h
       {
-        name: name,
         type: type,
-        description: description,
-        required: required
+        description: description
       }
     end
   end
@@ -86,10 +94,17 @@ module ModelContextProtocol
       self
     end
 
+    def properties_hash
+      properties.each_with_object Hash.new do |prop, hash|
+        hash[prop.name.freeze] = prop.to_h
+      end
+    end
+
     def to_h
       {
         type: type,
-        properties: properties.map(&:to_h)
+        properties: properties_hash,
+        required: properties.select(&:required).map(&:name)
       }
     end
   end

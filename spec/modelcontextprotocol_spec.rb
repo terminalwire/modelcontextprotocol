@@ -21,8 +21,8 @@ RSpec.describe ModelContextProtocol::Tool do
 
       input_schema = tool.to_h[:input_schema]
       expect(input_schema[:type]).to eq("object")
-      expect(input_schema[:properties].first[:name]).to eq("test_property")
-      expect(input_schema[:properties].first[:required]).to eq(true)
+      expect(input_schema[:properties]["test_property"][:type]).to eq("string")
+      expect(input_schema[:properties]["test_property"][:description]).to eq("A test property")
     end
 
     it "serializes to camelCase JSON" do
@@ -43,8 +43,8 @@ RSpec.describe ModelContextProtocol::Tool do
       expect(parsed).to have_key("inputSchema")
       expect(parsed["inputSchema"]).to have_key("type")
       expect(parsed["inputSchema"]).to have_key("properties")
-      expect(parsed["inputSchema"]["properties"].first).to have_key("name")
-      expect(parsed["inputSchema"]["properties"].first).to have_key("required")
+      expect(parsed["inputSchema"]["properties"]["test_property"]).to have_key("type")
+      expect(parsed["inputSchema"]["properties"]["test_property"]).to have_key("description")
     end
   end
 
@@ -82,30 +82,31 @@ RSpec.describe ModelContextProtocol::Tools do
     tools.add_tool(tool)
 
     # Expected output hash
-    expected_hash = {
-      "jsonrpc" => "2.0",
-      "id" => 1,
-      "result" => {
-        "tools" => [
+    expected_hash = JSON.parse <<~JSON
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "tools": [
           {
-            "name" => "get_weather",
-            "description" => "Get current weather information for a location",
-            "inputSchema" => {
-              "type" => "object",
-              "properties" => [
-                {
-                  "name" => "location",
-                  "type" => "string",
-                  "description" => "City name or zip code",
-                  "required" => true
+            "name": "get_weather",
+            "description": "Get current weather information for a location",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "string",
+                  "description": "City name or zip code"
                 }
-              ]
+              },
+              "required": ["location"]
             }
           }
         ],
-        "nextCursor" => "next-page-cursor"
+        "nextCursor": "next-page-cursor"
       }
     }
+    JSON
 
     json_output = tools.to_json
     parsed_output = JSON.parse(json_output)
