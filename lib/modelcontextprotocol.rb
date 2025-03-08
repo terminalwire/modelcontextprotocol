@@ -81,8 +81,8 @@ module ModelContextProtocol
     # @param description [String] Description of the property.
     # @param required [Boolean] Whether the property is required.
     # @return [Input] Returns self for chaining.
-    def property(name:, type:, description:, required: false)
-      @properties << Property.new(name: name, type: type, description: description, required: required)
+    def property(...)
+      @properties << Property.new(...)
       self
     end
 
@@ -112,8 +112,8 @@ module ModelContextProtocol
     # @param type [String] The type for the input schema (default: "object").
     # @yieldparam [Input] Yields the input instance to allow adding properties.
     # @return [Tool] Returns self for chaining.
-    def input(type: "object")
-      @input_schema ||= Input.new(type: type)
+    def input(...)
+      @input_schema ||= Input.new(...)
       yield(@input_schema) if block_given?
       self
     end
