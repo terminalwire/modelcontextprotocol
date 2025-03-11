@@ -10,38 +10,7 @@ module ModelContextProtocol
   # Module to automatically convert snake_case keys to camelCase when serializing to JSON.
   module CamelCaseJson
     def to_json(*options)
-      JSON.generate(camelize_hash_keys(to_h), *options)
-    end
-
-    private
-
-    def camelize_hash_keys(obj)
-      case obj
-      when Array
-        obj.map { |item| camelize_hash_keys(item) }
-      when Hash
-        obj.each_with_object({}) do |(key, value), new_hash|
-          new_key = modify_key(key.to_s)
-          new_hash[new_key] = camelize_hash_keys(value)
-        end
-      else
-        obj
-      end
-    end
-
-    def modify_key(key)
-      # In some cases, we want to emit keys that don't get snake cased, so for that
-      # we freeze strings and leave them alone.
-      if key.is_a?(String) and key.frozen?
-        key
-      else
-        camelize key
-      end
-    end
-
-    def camelize(snake_str)
-      parts = snake_str.split('_')
-      parts[0] + parts[1..-1].map(&:capitalize).join
+      JSON.generate(as_json, *options)
     end
   end
 
@@ -62,7 +31,7 @@ module ModelContextProtocol
       @required = required
     end
 
-    def to_h
+    def as_json
       {
         type: type,
         description: description
@@ -96,11 +65,11 @@ module ModelContextProtocol
 
     def properties_hash
       properties.each_with_object Hash.new do |prop, hash|
-        hash[prop.name.freeze] = prop.to_h
+        hash[prop.name] = prop.as_json
       end
     end
 
-    def to_h
+    def as_json
       {
         type: type,
         properties: properties_hash,
@@ -133,11 +102,11 @@ module ModelContextProtocol
       self
     end
 
-    def to_h
+    def as_json
       {
         name: name,
         description: description,
-        input_schema: input_schema ? input_schema.to_h : nil
+        inputSchema: input_schema ? input_schema.as_json : nil
       }
     end
   end
@@ -161,13 +130,13 @@ module ModelContextProtocol
       self
     end
 
-    def to_h
+    def as_json
       {
         jsonrpc: "2.0",
         id: id,
         result: {
-          tools: tools.map(&:to_h),
-          next_cursor: next_cursor
+          tools: tools.map(&:as_json),
+          nextCursor: next_cursor
         }
       }
     end

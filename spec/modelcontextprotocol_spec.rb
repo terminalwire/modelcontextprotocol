@@ -19,7 +19,7 @@ RSpec.describe ModelContextProtocol::Tool do
         )
       end
 
-      input_schema = tool.to_h[:input_schema]
+      input_schema = tool.as_json[:inputSchema]
       expect(input_schema[:type]).to eq("object")
       expect(input_schema[:properties]["test_property"][:type]).to eq("string")
       expect(input_schema[:properties]["test_property"][:description]).to eq("A test property")
